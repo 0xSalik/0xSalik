@@ -63,7 +63,7 @@ const FRAME_DELAY   = Math.floor(1000 / FPS);
   for (let i = 0; i < FRAME_COUNT; i++) {
     const framePath = path.join(framesDir, `frame_${String(i).padStart(4, '0')}.png`);
     await page.screenshot({ path: framePath, type: 'png' });
-    await page.waitForTimeout(FRAME_DELAY);
+    await new Promise((resolve) => setTimeout(resolve, FRAME_DELAY));
   }
 
   await browser.close();
