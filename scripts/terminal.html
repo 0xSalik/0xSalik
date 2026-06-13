@@ -5,160 +5,288 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>terminal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
   :root {
-    --amber:      #FF9500;
-    --amber-dim:  #A85F00;
-    --amber-hi:   #FFB84D;
-    --amber-glow: rgba(255,149,0,0.12);
-    --bg:         #0D0800;
-    --surface:    #130B00;
+    --amber:      #FF9F1C;
+    --amber-dim:  #8B5A0F;
+    --amber-hi:   #FFC766;
+    --amber-soft: #FFD699;
+    --amber-glow: rgba(255,159,28,0.18);
+    --bg:         #0A0600;
+    --bg-2:       #100900;
+    --surface:    #170D00;
+    --line:       #2A1700;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html, body { background: var(--bg); }
+
   body {
-    background: var(--bg);
-    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    font-family: 'JetBrains Mono', 'Share Tech Mono', 'Courier New', monospace;
     color: var(--amber);
-    width: 900px;
-    height: 620px;
+    width: 1100px;
     overflow: hidden;
     position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: geometricPrecision;
+  }
+
+  .frame {
+    position: relative;
+    background:
+      radial-gradient(ellipse at top, rgba(255,159,28,0.06) 0%, transparent 55%),
+      linear-gradient(180deg, #0E0700 0%, #080500 100%);
+    padding: 18px 22px 26px;
+    border: 1px solid #1B0E00;
+    border-radius: 10px;
+    box-shadow:
+      0 0 0 1px rgba(255,159,28,0.04) inset,
+      0 30px 60px -20px rgba(0,0,0,0.8);
+    overflow: hidden;
   }
 
   .scanlines {
     position: absolute; inset: 0;
     background: repeating-linear-gradient(
-      to bottom, transparent 0 3px, rgba(0,0,0,0.18) 3px 4px
+      to bottom, transparent 0 2px, rgba(0,0,0,0.22) 2px 3px
     );
     pointer-events: none;
     z-index: 50;
+    mix-blend-mode: multiply;
   }
 
   .vignette {
     position: absolute; inset: 0;
-    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.65) 100%);
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.55) 100%);
     pointer-events: none;
     z-index: 49;
   }
 
   .term {
-    padding: 22px 26px 26px;
+    padding: 4px 8px 12px;
     position: relative; z-index: 1;
-    height: 100%;
-    overflow: hidden;
   }
 
   .topbar {
     display: flex; align-items: center; gap: 8px;
     margin-bottom: 18px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--amber-dim);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
   }
-  .dot { width: 10px; height: 10px; border-radius: 50%; }
-  .dr { background: #883333; }
-  .dy { background: #886600; }
-  .dg { background: #226622; }
-  .title { font-size: 11px; color: var(--amber-dim); margin-left: auto; letter-spacing: 1px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; box-shadow: 0 0 6px rgba(0,0,0,0.6) inset; }
+  .dr { background: #FF5F56; }
+  .dy { background: #FFBD2E; }
+  .dg { background: #27C93F; }
+  .title {
+    font-size: 12px; color: var(--amber-dim);
+    margin-left: auto; letter-spacing: 1.5px;
+    text-transform: lowercase;
+  }
 
   .ascii {
-    font-size: 8.5px; line-height: 1.15;
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    font-size: 10px; line-height: 1.1;
     color: var(--amber-hi);
+    text-shadow: 0 0 6px rgba(255,159,28,0.4);
     white-space: pre;
-    margin-bottom: 14px;
+    margin: 4px 0 6px;
     opacity: 0;
-    transition: opacity 0.5s;
+    transition: opacity 0.55s ease;
+  }
+  .tagline {
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: var(--amber-dim);
+    margin: 0 0 16px 6px;
+    opacity: 0;
+    transition: opacity 0.5s ease 0.15s;
   }
 
-  .row { display: flex; gap: 0; margin-bottom: 1px; opacity: 0; transition: opacity 0.28s, transform 0.28s; transform: translateY(3px); font-size: 12px; line-height: 1.65; }
+  .row {
+    display: flex; gap: 0; margin-bottom: 2px;
+    opacity: 0;
+    transition: opacity 0.28s ease, transform 0.28s ease;
+    transform: translateY(4px);
+    font-size: 13.5px;
+    line-height: 1.7;
+  }
   .row.in { opacity: 1; transform: none; }
 
-  .ps { color: var(--amber-dim); margin-right: 6px; flex-shrink: 0; }
+  .ps  { color: var(--amber-dim); margin-right: 8px; flex-shrink: 0; }
   .cmd { color: var(--amber-hi); }
-  .arg { color: #FFD580; }
-  .fl  { color: #A07010; }
+  .arg { color: var(--amber-soft); }
+  .fl  { color: #B47416; }
 
-  .out { margin: 2px 0 12px; font-size: 12px; line-height: 1.7; opacity: 0; transition: opacity 0.3s; }
+  .out {
+    margin: 4px 0 14px;
+    font-size: 13px; line-height: 1.75;
+    opacity: 0;
+    transition: opacity 0.32s ease;
+  }
   .out.in { opacity: 1; }
-  .k   { color: var(--amber-dim); }
+  .k   { color: var(--amber-dim); display: inline-block; min-width: 78px; }
   .v   { color: var(--amber-hi); }
-  .m   { color: #5A3800; }
-  .ac  { color: #FF6B00; }
-  .br  { color: #FFD580; }
+  .m   { color: #6B4205; }
 
   .sh {
-    font-size: 10px; letter-spacing: 3px; color: var(--amber-dim);
+    font-size: 10.5px; letter-spacing: 4px; color: var(--amber-dim);
     text-transform: uppercase;
-    border-bottom: 1px solid #1E1200;
-    padding-bottom: 4px; margin: 14px 0 8px;
-    opacity: 0; transition: opacity 0.3s;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 5px; margin: 18px 0 10px;
+    opacity: 0;
+    transition: opacity 0.32s ease;
   }
   .sh.in { opacity: 1; }
 
-  .bar-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; opacity: 0; transition: opacity 0.3s, transform 0.3s; transform: translateX(-6px); }
+  .bar-row {
+    display: flex; align-items: center; gap: 12px;
+    margin: 5px 0;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateX(-8px);
+  }
   .bar-row.in { opacity: 1; transform: none; }
-  .bl { font-size: 11px; color: var(--amber-dim); min-width: 95px; }
-  .bt { flex: 1; height: 5px; background: #180C00; border: 1px solid #221100; overflow: hidden; border-radius: 2px; }
-  .bf { height: 100%; background: var(--amber); width: 0; transition: width 1.1s cubic-bezier(0.16,1,0.3,1); border-radius: 2px; }
-  .bp { font-size: 10px; color: var(--amber-dim); min-width: 30px; text-align: right; }
+  .bl { font-size: 12px; color: var(--amber-dim); min-width: 130px; }
+  .bt {
+    flex: 1; height: 8px;
+    background: #160A00;
+    border: 1px solid #2A1700;
+    overflow: hidden;
+    border-radius: 3px;
+  }
+  .bf {
+    height: 100%;
+    background: linear-gradient(90deg, var(--amber) 0%, var(--amber-hi) 100%);
+    width: 0;
+    transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+    border-radius: 3px;
+    box-shadow: 0 0 8px rgba(255,159,28,0.35);
+  }
+  .bp { font-size: 11px; color: var(--amber-hi); min-width: 40px; text-align: right; }
 
-  .tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0; opacity: 0; transition: opacity 0.3s; }
+  .tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin: 6px 0;
+    opacity: 0;
+    transition: opacity 0.32s ease;
+  }
   .tags.in { opacity: 1; }
-  .tag { font-size: 10px; padding: 2px 8px; border: 1px solid var(--amber-dim); color: var(--amber-hi); background: #130B00; border-radius: 3px; }
+  .tag {
+    font-size: 11px; padding: 3px 10px;
+    border: 1px solid var(--amber-dim);
+    color: var(--amber-hi);
+    background: rgba(255,159,28,0.04);
+    border-radius: 4px;
+    letter-spacing: 0.4px;
+  }
 
-  .sgrid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin: 6px 0; opacity: 0; transition: opacity 0.3s; }
+  .sgrid {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 12px;
+    margin: 8px 0;
+    opacity: 0;
+    transition: opacity 0.32s ease;
+  }
   .sgrid.in { opacity: 1; }
-  .sbox { background: #110800; border: 1px solid #221100; padding: 8px 10px; text-align: center; border-radius: 4px; }
-  .snum { font-size: 20px; color: var(--amber-hi); display: block; line-height: 1.2; }
-  .slbl { font-size: 9px; color: var(--amber-dim); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; display: block; }
+  .sbox {
+    background: linear-gradient(180deg, rgba(255,159,28,0.06) 0%, rgba(255,159,28,0.02) 100%);
+    border: 1px solid #2A1700;
+    padding: 12px 14px;
+    text-align: center;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sbox::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--amber), transparent);
+    opacity: 0.5;
+  }
+  .snum {
+    font-size: 26px; font-weight: 500;
+    color: var(--amber-hi);
+    display: block; line-height: 1.1;
+    text-shadow: 0 0 10px rgba(255,159,28,0.3);
+  }
+  .slbl {
+    font-size: 10px; color: var(--amber-dim);
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-top: 4px; display: block;
+  }
 
-  .contacts { display: flex; gap: 16px; flex-wrap: wrap; margin: 4px 0; opacity: 0; transition: opacity 0.3s; }
+  .contacts {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 24px;
+    margin: 6px 0;
+    opacity: 0;
+    transition: opacity 0.32s ease;
+  }
   .contacts.in { opacity: 1; }
-  .ci { font-size: 11px; color: var(--amber-dim); }
+  .ci {
+    font-size: 12px; color: var(--amber-dim);
+    display: flex; gap: 8px; align-items: center;
+  }
+  .ci b {
+    font-weight: 400; color: var(--amber-dim);
+    min-width: 70px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 10px;
+  }
   .ci span { color: var(--amber-hi); }
 
-  .cursor { display: inline-block; width: 7px; height: 13px; background: var(--amber); vertical-align: middle; animation: blink 1s step-end infinite; }
+  .cursor {
+    display: inline-block; width: 8px; height: 14px;
+    background: var(--amber); vertical-align: middle;
+    margin-left: 2px;
+    box-shadow: 0 0 8px rgba(255,159,28,0.6);
+    animation: blink 1s step-end infinite;
+  }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-  .hr { border: none; border-top: 1px solid #1A0E00; margin: 12px 0; opacity: 0; transition: opacity 0.3s; }
-  .hr.in { opacity: 1; }
+  .prompt-final {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--amber-dim);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .prompt-final.in { opacity: 1; }
+  .prompt-final .ok { color: #4CAF50; }
 
   @keyframes flicker {
-    0%,100%{opacity:1} 92%{opacity:1} 93%{opacity:.87} 94%{opacity:1} 97%{opacity:.93} 98%{opacity:1}
+    0%,100%{opacity:1} 92%{opacity:1} 93%{opacity:.9} 94%{opacity:1} 97%{opacity:.95} 98%{opacity:1}
   }
-  body { animation: flicker 9s infinite; }
+  .frame { animation: flicker 11s infinite; }
 </style>
 </head>
 <body>
+<div class="frame">
 <div class="scanlines"></div>
 <div class="vignette"></div>
 <div class="term">
 
   <div class="topbar">
     <div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div>
-    <div class="title">bash — salik@dev ~ 80×32</div>
+    <div class="title">bash &nbsp;—&nbsp; salik@dev &nbsp;—&nbsp; 120×40</div>
   </div>
 
-  <div class="ascii" id="asc">
- ███████╗ █████╗ ██╗     ██╗██╗  ██╗    ██╗  ██╗██╗  ██╗ █████╗ ███╗  ██╗
+  <div class="ascii" id="asc"> ███████╗ █████╗ ██╗     ██╗██╗  ██╗    ██╗  ██╗██╗  ██╗ █████╗ ███╗  ██╗
  ██╔════╝██╔══██╗██║     ██║██║ ██╔╝    ██║ ██╔╝██║  ██║██╔══██╗████╗ ██║
  ███████╗███████║██║     ██║█████╔╝     █████╔╝ ███████║███████║██╔██╗██║
  ╚════██║██╔══██║██║     ██║██╔═██╗     ██╔═██╗ ██╔══██║██╔══██║██║╚████║
  ███████║██║  ██║███████╗██║██║  ██╗    ██║  ██╗██║  ██║██║  ██║██║ ╚███║
- ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝╚═╝  ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚══╝
-                    CSE Undergrad · Systems + Web · OSS
-  </div>
+ ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚══╝</div>
+  <div class="tagline" id="tag">CSE Undergrad &middot; Systems + Web &middot; Open Source</div>
 
   <div class="sh" id="sh0">// whoami</div>
   <div class="row" id="p0"><span class="ps">$</span><span class="cmd">cat</span>&nbsp;<span class="arg">/etc/profile.d/salik.conf</span></div>
   <div class="out" id="o0">
-    <div><span class="k">name     </span><span class="v">Salik Khan  </span><span class="m">[ 0xSalik ]</span></div>
-    <div><span class="k">focus    </span><span class="v">Systems · Kernel · Networking · Full-Stack · Distributed</span></div>
-    <div><span class="k">stack    </span><span class="v">C / C++ / Rust / Go · React / Next.js · Linux</span></div>
+    <div><span class="k">name</span><span class="v">Salik Khan</span>&nbsp;&nbsp;<span class="m">[ 0xSalik ]</span></div>
+    <div><span class="k">focus</span><span class="v">Systems &middot; Kernel &middot; Networking &middot; Full-Stack &middot; Distributed</span></div>
+    <div><span class="k">stack</span><span class="v">C / C++ / Rust / Go &middot; React / Next.js &middot; Linux</span></div>
   </div>
-
-  <hr class="hr" id="hr0">
 
   <div class="sh" id="sh1">// language proficiency</div>
   <div class="row" id="p1"><span class="ps">$</span><span class="cmd">cloc</span>&nbsp;<span class="fl">--by-lang</span>&nbsp;<span class="arg">~/repos/</span></div>
@@ -171,8 +299,6 @@
     <div class="bar-row" id="sk5"><span class="bl">Shell / Bash</span><div class="bt"><div class="bf" data-p="88"></div></div><span class="bp">88%</span></div>
   </div>
 
-  <hr class="hr" id="hr1">
-
   <div class="sh" id="sh2">// kernel modules loaded</div>
   <div class="row" id="p2"><span class="ps">$</span><span class="cmd">lsmod</span>&nbsp;<span class="fl">| grep</span>&nbsp;<span class="arg">expertise</span></div>
   <div class="out" id="o2">
@@ -182,7 +308,7 @@
     </div>
     <div class="tags" id="tg1">
       <div class="tag">Distributed Systems</div><div class="tag">gRPC / Protobuf</div>
-      <div class="tag">Kubernetes Internals</div><div class="tag">service mesh</div>
+      <div class="tag">Kubernetes Internals</div><div class="tag">Service Mesh</div>
     </div>
     <div class="tags" id="tg2">
       <div class="tag">React</div><div class="tag">Next.js</div>
@@ -190,39 +316,35 @@
     </div>
   </div>
 
-  <hr class="hr" id="hr2">
-
   <div class="sh" id="sh3">// /proc/self/status</div>
   <div class="row" id="p3"><span class="ps">$</span><span class="cmd">gh</span>&nbsp;<span class="fl">api</span>&nbsp;<span class="arg">users/0xSalik</span>&nbsp;<span class="fl">--live</span></div>
   <div class="out" id="o3">
     <div class="sgrid" id="sgrid">
-      <div class="sbox"><span class="snum" id="cnt-r">0</span><span class="slbl">REPOS</span></div>
-      <div class="sbox"><span class="snum" id="cnt-c">0</span><span class="slbl">COMMITS</span></div>
-      <div class="sbox"><span class="snum" id="cnt-s">0</span><span class="slbl">STARS</span></div>
+      <div class="sbox"><span class="snum" id="cnt-r">0</span><span class="slbl">Public Repos</span></div>
+      <div class="sbox"><span class="snum" id="cnt-c">0</span><span class="slbl">Total Commits</span></div>
+      <div class="sbox"><span class="snum" id="cnt-s">0</span><span class="slbl">Stars Earned</span></div>
     </div>
   </div>
-
-  <hr class="hr" id="hr3">
 
   <div class="sh" id="sh4">// open connections</div>
   <div class="row" id="p4"><span class="ps">$</span><span class="cmd">ss</span>&nbsp;<span class="fl">-tlnp</span>&nbsp;<span class="fl">| grep</span>&nbsp;<span class="arg">ESTABLISHED</span></div>
   <div class="out" id="o4">
     <div class="contacts" id="cts">
-      <div class="ci">github <span>→ github.com/0xSalik</span></div>
-      <div class="ci">linkedin <span>→ linkedin.com/in/salik--khan</span></div>
-      <div class="ci">email <span>→ contact@salikkhan.com</span></div>
-      <div class="ci">blog <span>→ salikkhan.com/blog</span></div>
+      <div class="ci"><b>github</b><span>github.com/0xSalik</span></div>
+      <div class="ci"><b>linkedin</b><span>linkedin.com/in/salik--khan</span></div>
+      <div class="ci"><b>email</b><span>contact@salikkhan.com</span></div>
+      <div class="ci"><b>blog</b><span>salikkhan.com/blog</span></div>
     </div>
   </div>
 
-  <div style="margin-top:10px;font-size:12px;color:var(--amber-dim);">
-    <span class="ps">root@salik ~#</span>&nbsp;<span class="cursor"></span>
+  <div class="prompt-final" id="finalp">
+    <span class="ok">[ ok ]</span>&nbsp;profile loaded&nbsp;&middot;&nbsp;<span style="color:var(--amber-hi);">root@salik</span>&nbsp;<span class="ps">~#</span>&nbsp;<span class="cursor"></span>
   </div>
 
 </div>
+</div>
 
 <script>
-// Stats injected by generate-gif.js — these tokens get replaced
 const REPOS   = __REPOS__;
 const COMMITS = __COMMITS__;
 const STARS   = __STARS__;
@@ -250,37 +372,70 @@ function animBars() {
 
 const seq = [
   () => { $('asc').style.opacity = '1'; },
+  () => { $('tag').style.opacity = '1'; },
   () => show('sh0'),
   () => show('p0'),
   () => show('o0'),
-  () => show('hr0'),
   () => show('sh1'),
   () => show('p1'),
-  () => { show('o1'); ['sk0','sk1','sk2','sk3','sk4','sk5'].forEach((id,i) => setTimeout(()=>show(id), i*100)); setTimeout(animBars, 100); },
-  () => show('hr1'),
+  () => { show('o1'); ['sk0','sk1','sk2','sk3','sk4','sk5'].forEach((id,i) => setTimeout(()=>show(id), i*90)); setTimeout(animBars, 120); },
   () => show('sh2'),
   () => show('p2'),
   () => { show('o2'); ['tg0','tg1','tg2'].forEach((id,i) => setTimeout(()=>show(id), i*120)); },
-  () => show('hr2'),
   () => show('sh3'),
   () => show('p3'),
-  () => { show('o3'); show('sgrid'); setTimeout(()=>{ countUp('cnt-r',REPOS); countUp('cnt-c',COMMITS,'+'||''); countUp('cnt-s',STARS); }, 200); },
-  () => show('hr3'),
+  () => { show('o3'); show('sgrid'); setTimeout(()=>{
+    countUp('cnt-r', REPOS);
+    countUp('cnt-c', COMMITS, COMMITS > 0 ? '+' : '');
+    countUp('cnt-s', STARS);
+  }, 180); },
   () => show('sh4'),
   () => show('p4'),
   () => { show('o4'); show('cts'); },
+  () => show('finalp'),
 ];
 
-const delays = [300,180,160,280,120,160,160,400,120,160,160,360,120,160,160,380,120,160,160,320];
+const delays = [
+  280,  // ascii
+  140,  // tagline
+  220,  // sh0
+  140,  // p0
+  160,  // o0
+  340,  // sh1
+  130,  // p1
+  150,  // o1 (bars)
+  900,  // sh2  (wait for bars)
+  130,  // p2
+  150,  // o2 (tags)
+  600,  // sh3 (wait for tags)
+  130,  // p3
+  150,  // o3 (counters)
+  1300, // sh4 (wait for count-up)
+  130,  // p4
+  160,  // o4 (contacts)
+  340,  // finalp
+];
 
 let i = 0;
 function run() {
-  if(i >= seq.length) return;
+  if(i >= seq.length) { window.__ANIM_DONE__ = true; return; }
   seq[i]();
+  const d = delays[i] || 200;
   i++;
-  if(i < seq.length) setTimeout(run, delays[i] || 180);
+  if(i < seq.length) setTimeout(run, d);
+  else setTimeout(() => { window.__ANIM_DONE__ = true; }, d);
 }
-setTimeout(run, 400);
+
+window.__ANIM_DONE__ = false;
+window.__startAnim = function () {
+  if (window.__ANIM_STARTED__) return;
+  window.__ANIM_STARTED__ = true;
+  setTimeout(run, 250);
+};
+
+if (!window.__MANUAL_START__) {
+  window.__startAnim();
+}
 </script>
 </body>
 </html>

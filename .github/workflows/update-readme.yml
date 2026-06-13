@@ -27,7 +27,7 @@ jobs:
         run: |
           npm install --prefix scripts
           sudo apt-get update -qq
-          sudo apt-get install -y ffmpeg imagemagick
+          sudo apt-get install -y ffmpeg gifsicle
 
       - name: Fetch GitHub stats
         env:
