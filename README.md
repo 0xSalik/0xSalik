@@ -37,9 +37,9 @@ Currently obsessed with eBPF, service mesh internals, and making allocators fast
 | metric | value |
 |--------|-------|
 | 📦 Public Repos | <!-- STAT:repos --> 27 <!-- /STAT:repos --> |
-| 📝 Total Commits | <!-- STAT:commits --> — <!-- /STAT:commits --> |
-| ⭐ Total Stars | <!-- STAT:stars --> 0 <!-- /STAT:stars --> |
-| 🕒 Last Updated | <!-- STAT:updated --> — <!-- /STAT:updated --> |
+| 📝 Total Commits | <!-- STAT:commits --> 350+ <!-- /STAT:commits --> |
+| ⭐ Total Stars | <!-- STAT:stars --> 22 <!-- /STAT:stars --> |
+| 🕒 Last Updated | <!-- STAT:updated --> Jun 13, 2026 <!-- /STAT:updated --> |
 
 > Stats auto-updated daily via [GitHub Actions](.github/workflows/update-readme.yml)
 
