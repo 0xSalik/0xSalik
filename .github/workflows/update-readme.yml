@@ -1,0 +1,50 @@
+name: Update README Terminal GIF
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # runs daily at midnight UTC
+  push:
+    branches: [main]
+  workflow_dispatch:       # allow manual trigger from GitHub UI
+
+permissions:
+  contents: write
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install --prefix scripts
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg imagemagick
+
+      - name: Fetch GitHub stats
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_USERNAME: 0xSalik
+        run: node scripts/fetch-stats.js
+
+      - name: Generate terminal GIF
+        run: node scripts/generate-gif.js
+
+      - name: Inject stats into README
+        run: node scripts/inject-stats.js
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md assets/terminal.gif
+          git diff --staged --quiet || git commit -m "chore: auto-update stats + terminal gif [skip ci]"
+          git push

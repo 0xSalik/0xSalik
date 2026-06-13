@@ -1,0 +1,11 @@
+{
+  "name": "readme-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "puppeteer": "^22.0.0",
+    "sharp": "^0.33.0"
+  }
+}
